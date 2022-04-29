@@ -39,6 +39,8 @@ const Post = ({ post, morePosts, preview }: Props) => {
     return <ErrorPage statusCode={404} />
   }
 
+  const showLogin = !isAuth && post.premium
+
   return (
     <Layout preview={preview}>
       <Container>
@@ -62,7 +64,7 @@ const Post = ({ post, morePosts, preview }: Props) => {
                 premium={post.premium}
               />
               <PostBody content={content} />
-              {!isAuth ? 
+              {showLogin ? 
                 <div className='border flex flex-col max-w-lg p-8 mx-auto rounded'>
                   <h3 className='text-4xl'>Login to continue reading.</h3>
                   <div className='mt-2'>
