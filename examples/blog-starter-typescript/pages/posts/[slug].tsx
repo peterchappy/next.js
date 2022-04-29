@@ -11,6 +11,9 @@ import Head from 'next/head'
 import { CMS_NAME } from '../../lib/constants'
 import markdownToHtml from '../../lib/markdownToHtml'
 import PostType from '../../types/post'
+import { useMemo } from 'react'
+import FormLogin from '../../components/form-login'
+import { useAuthContext } from '../../contexts/Auth'
 
 type Props = {
   post: PostType
@@ -20,9 +23,24 @@ type Props = {
 
 const Post = ({ post, morePosts, preview }: Props) => {
   const router = useRouter()
+  const { token } = useAuthContext()
+  const isAuth = !!token
+
+  const content = useMemo(() => {
+    if(!post.premium || isAuth){
+      return post.content
+    }
+
+    const splitContent = post.content.split('\n')
+    return splitContent[0] || ''
+  }, [post, isAuth])
+
   if (!router.isFallback && !post?.slug) {
     return <ErrorPage statusCode={404} />
   }
+
+  console.log(post.content.split('\n'))
+
   return (
     <Layout preview={preview}>
       <Container>
@@ -43,8 +61,18 @@ const Post = ({ post, morePosts, preview }: Props) => {
                 coverImage={post.coverImage}
                 date={post.date}
                 author={post.author}
+                premium={post.premium}
               />
-              <PostBody content={post.content} />
+              <PostBody content={content} />
+              {!isAuth ? 
+                <div className='border flex flex-col max-w-lg p-8 mx-auto rounded'>
+                  <h3 className='text-4xl'>Login to continue reading.</h3>
+                  <div className='mt-2'>
+                    <FormLogin /> 
+                  </div>
+                </div>
+                : null
+              }
             </article>
           </>
         )}
@@ -70,7 +98,9 @@ export async function getStaticProps({ params }: Params) {
     'content',
     'ogImage',
     'coverImage',
+    'premium'
   ])
+
   const content = await markdownToHtml(post.content || '')
 
   return {
