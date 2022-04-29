@@ -39,8 +39,6 @@ const Post = ({ post, morePosts, preview }: Props) => {
     return <ErrorPage statusCode={404} />
   }
 
-  console.log(post.content.split('\n'))
-
   return (
     <Layout preview={preview}>
       <Container>
